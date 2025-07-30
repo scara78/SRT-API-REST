@@ -36,9 +36,5 @@
       ]
     }
   ],
-  "functions": {
-    "main.py": {
-      "maxDuration": 10
-    }
-  }
+ 
 }
