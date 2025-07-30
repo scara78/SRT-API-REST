@@ -8,18 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "main.py"
-    }
-  ],
-  "env": {
-    "OPENSUBTITLES_USERNAME": "@opensubtitles_username", 
-    "OPENSUBTITLES_PASSWORD": "@opensubtitles_password",
-    "SESSION_SECRET": "@session_secret"
-  },
-  "headers": [
-    {
-      "source": "/api/(.*)",
+      "src": "/api/(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
@@ -33,8 +22,17 @@
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type"
         }
-      ]
+      ],
+      "dest": "main.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
     }
-  ]
-  
+  ],
+  "env": {
+    "OPENSUBTITLES_USERNAME": "@opensubtitles_username", 
+    "OPENSUBTITLES_PASSWORD": "@opensubtitles_password",
+    "SESSION_SECRET": "@session_secret"
+  }
 }
