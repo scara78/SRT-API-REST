@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Portainer Community Edition
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - portainer_data:/data
+    restart: unless-stopped
+    networks:
+      - portainer-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.localhost`)"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  # OpenSubtitles API
+  opensubtitles-api:
+    build: .
+    container_name: opensubtitles-api
+    ports:
+      - "5000:5000"
+    environment:
+      - OPENSUBTITLES_USERNAME=${OPENSUBTITLES_USERNAME:-scara78}
+      - OPENSUBTITLES_PASSWORD=${OPENSUBTITLES_PASSWORD:-scara78}
+      - SESSION_SECRET=${SESSION_SECRET:-your-secret-key-change-this}
+    volumes:
+      - ./logs:/app/logs
+      - api_cache:/app/cache
+    restart: unless-stopped
+    networks:
+      - portainer-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.opensubtitles-api.rule=Host(`api.localhost`)"
+      - "traefik.http.services.opensubtitles-api.loadbalancer.server.port=5000"
+
+  # Traefik reverse proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certificates:/certificates
+    networks:
+      - portainer-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
+networks:
+  portainer-network:
+    driver: bridge
+
+volumes:
+  portainer_data:
+  api_cache:
+  traefik_certificates:

@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  opensubtitles-api:
+    build: .
+    container_name: opensubtitles-api
+    ports:
+      - "5000:5000"
+    environment:
+      - OPENSUBTITLES_USERNAME=${OPENSUBTITLES_USERNAME:-scara78}
+      - OPENSUBTITLES_PASSWORD=${OPENSUBTITLES_PASSWORD:-scara78}
+      - SESSION_SECRET=${SESSION_SECRET:-your-secret-key-change-this}
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - opensubtitles-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.opensubtitles-api.rule=Host(`subtitles.localhost`)"
+      - "traefik.http.services.opensubtitles-api.loadbalancer.server.port=5000"
+
+  # Optional: Traefik reverse proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - opensubtitles-network
+    restart: unless-stopped
+
+networks:
+  opensubtitles-network:
+    driver: bridge
+
+volumes:
+  logs:
