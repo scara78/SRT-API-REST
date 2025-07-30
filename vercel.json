@@ -2,23 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "main.py",
+      "src": "index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "main.py",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
-    },
-    {
       "src": "/(.*)",
-      "dest": "main.py"
+      "dest": "index.py"
     }
   ],
   "env": {
@@ -27,3 +18,4 @@
     "SESSION_SECRET": "@session_secret"
   }
 }
+
